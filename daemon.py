@@ -1,9 +1,12 @@
-from enum import CONFORM
 import daemon
 import sqlite3
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 import logging
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 LOG_FILE = "/var/log/verak/daemon.log"
 con = sqlite3.connect("database/sensor_data.db3")
@@ -19,7 +22,19 @@ def on_message(client, userdata, msg):
 
 def main():
     client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id="esp32-sub")
+
     client.on_connect = on_connect
     client.on_message = on_message
-    client.username_pw_set("esp")-
 
+    client.username_pw_set(os.getenv("MQTT_USER"), os.getenv("MQTT_PASS"))
+
+    client.connect(os.getenv("HOST"), int(os.getenv("PORT")), 60)
+
+    client.loop_forever()
+
+
+#with daemon.DaemonContext():
+    #main()
+
+if __name__ == "__main__":
+    main()
