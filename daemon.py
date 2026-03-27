@@ -1,4 +1,3 @@
-import daemon
 import sqlite3
 import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
@@ -12,23 +11,34 @@ LOG_FILE = "/var/log/verak/daemon.log"
 con = sqlite3.connect("database/sensor_data.db3")
 cur = con.cursor()
 
-cur.execute("CREATE TABLE IF NOT EXISTS ")
+# Need to create the table if it doesn't exist
+
 
 def on_connect(client, userdata, flag, reason_code, props):
-   client.subscribe("verak/sensors/esp32/digitalTemp")
+    print(f"Connected with {reason_code}")
+    client.subscribe("verak/sensors/esp32/digitalTemp")
 
 def on_message(client, userdata, msg):
-    cur.execute("insert into data values('')")
+    print(f"{msg.payload.decode()} from {msg.topic}")
+    #cur.execute("insert into data values('')")
 
 def main():
     client = mqtt.Client(CallbackAPIVersion.VERSION2, client_id="esp32-sub")
 
     client.on_connect = on_connect
     client.on_message = on_message
-
+    print(os.getenv("MQTT_USER"), os.getenv("MQTT_PASS"), os.getenv("PORT"), os.getenv("HOST"))
     client.username_pw_set(os.getenv("MQTT_USER"), os.getenv("MQTT_PASS"))
+    
 
-    client.connect(os.getenv("HOST"), int(os.getenv("PORT")), 60)
+    host = os.getenv("HOST")
+    port = int(os.getenv("PORT"))
+
+    if isinstance(host, str) and isinstance(port, int): 
+        client.connect(host, port, 60)
+    
+    else:
+        raise ValueError("Host or port invalid")
 
     client.loop_forever()
 
