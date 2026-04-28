@@ -23,19 +23,24 @@ def on_connect(client, userdata, flag, reason_code, props):
     client.subscribe("verak/sensors/esp32/#")
 
 def on_message(client, userdata, msg):
-    # payload = json.loads(msg.payload.decode())
+    payload = json.loads(msg.payload.decode())
     print(f"{msg.payload.decode()} from {msg.topic}")
    
     try:   
         identifier = msg.topic.split("/")[-1]
 
         if identifier == "analogTemp":
-            cur.execute("select id from unit where value = 'C'")
-            test = cur.fetchall()
-            print(test)
+            sql = f"insert into analogTemp values(?, ?, ?, ?)"
+            cur.execute(sql, (
+                payload['analogTemp'],
+                payload['resistance'],
+                payload['unit_id'],
+                payload['sensor_id'],
+                payload['device_id']
+            ))
 
         elif identifier == "digitalTemp":
-            pass
+            sql = f"insert into digitalTemp"
         #sql = f"insert into data values(?, ?, ?, ?, ?, ?)"
         #cur.execute(sql, (
             #payload['device'],
