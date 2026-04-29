@@ -40,16 +40,15 @@ def on_message(client, userdata, msg):
             ))
 
         elif identifier == "digitalTemp":
-            sql = f"insert into digitalTemp"
-        #sql = f"insert into data values(?, ?, ?, ?, ?, ?)"
-        #cur.execute(sql, (
-            #payload['device'],
-           # payload['digitalTemp'],
-          #payload['unit'],
-         #   payload['timestamp'],
-        #))
+            sql = f"insert into digitalTemp values(?, ?, ?, ?)"
+            cur.execute(sql, (
+                payload['digitalTemp'],
+                payload['unit_id'],
+                payload['sensor_id'],
+                payload['device_id']
+            ))
 
-       # con.commit()
+        con.commit()
     except Exception as ex:
         print(f"{ex}")
         
